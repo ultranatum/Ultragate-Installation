@@ -7,6 +7,9 @@ Shell script to install a [Ultragate masternodes](https://www.ultragate.org) on 
 wget -N https://raw.githubusercontent.com/ultranatum/Ultragate-installation/master/ulg_install.sh
 bash ulg_install.sh
 ```
+for changing permissions use command:
+```chmod +x *.sh```
+
 Wait until you request "Private Key" and paste your "masternode genkey" generated in the following steps.
 ***
 
