@@ -8,7 +8,7 @@ COIN_CLI='ultragate-cli'
 COIN_PATH='/usr/local/bin/'
 COIN_TGZ='https://github.com/ultranatum/ultragate/releases/download/v1.0.0.2/ultragate-1.0.0.2-x86_64-linux-gnu.tar.gz'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
-COIN_NAME='UltaGate'
+COIN_NAME='Ultagate'
 COIN_PORT=32852
 RPC_PORT=32853
 
