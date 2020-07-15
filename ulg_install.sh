@@ -6,7 +6,7 @@ CONFIGFOLDER='/root/.ultragate'
 COIN_DAEMON='ultragated'
 COIN_CLI='ultragate-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/ultranatum/ultragate/releases/download/v1.0.0.2/ultragate-1.0.0.2-x86_64-linux-gnu.tar.gz'
+COIN_TGZ='https://github.com/ultranatum/ultragate/releases/download/v1.1.0.0/ultragate-1.1.0.0-x86_64-linux-gnu.tar.gz'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 COIN_NAME='Ultagate'
 COIN_PORT=32852
@@ -118,7 +118,7 @@ function update_config() {
   sed -i 's/daemon=1/daemon=0/' $CONFIGFOLDER/$CONFIG_FILE
   cat << EOF >> $CONFIGFOLDER/$CONFIG_FILE
 logintimestamps=1
-maxconnections=16
+maxconnections=128
 #bind=$NODEIP
 masternode=1
 staking=0
@@ -126,11 +126,11 @@ externalip=$NODEIP:$COIN_PORT
 mastermodeaddr=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
 
-addnode=193.37.212.194
-addnode=95.179.188.208
-addnode=209.250.236.19
-addnode=104.238.131.165
-addnode=86.57.164.166
+addnode=185.206.145.11
+addnode=185.205.209.14
+addnode=185.141.61.244
+addnode=94.156.144.195
+addnode=185.141.61.248
 
 EOF
 }
