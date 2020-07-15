@@ -49,13 +49,13 @@ startmasternode alias 0 (mymnalias)
 ```
 14. Login to your VPS and check your masternode status by running the following command:
 ```
-ultragate-cli masternode status
+ultragate-cli masternodedebug
 ```
 ***
 
 ## Usage:
 ```
-ultragate-cli masternode status  
+ultragate-cli masternodedebug  
 ultragate-cli getinfo
 ```
 Also, if you want to check/start/stop **Ultragate**, run one of the following commands as **root**:
