@@ -217,7 +217,7 @@ apt-get update >/dev/null 2>&1
 apt-get install libzmq3-dev net-tools -y >/dev/null 2>&1
 apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" make software-properties-common \
 build-essential libtool autoconf libssl-dev \
-sudo automake git wget curl bsdmainutils net-tools \
+sudo automake git curl bsdmainutils net-tools \
 libminiupnpc-dev libgmp3-dev ufw pkg-config unzip >/dev/null 2>&1
 if [ "$?" -gt "0" ];
   then
@@ -225,14 +225,14 @@ if [ "$?" -gt "0" ];
     echo "apt-get update"
     echo "apt -y install software-properties-common"
     echo "apt-get update"
-    echo "apt install -y make software-properties-common build-essential libtool autoconf libssl-dev sudo automake git wget curl bsdmainutils net-tools libminiupnpc-dev libgmp3-dev ufw pkg-config unzip"
+    echo "apt install -y make software-properties-common build-essential libtool autoconf libssl-dev sudo automake git curl bsdmainutils net-tools libminiupnpc-dev libgmp3-dev ufw pkg-config unzip"
  exit 1
 fi
 clear
 }
 
 function important_information() {
- echo -e "================================================================================================================================"
+ echo -e "===================================================================================================================="
  echo -e "$COIN_NAME Masternode is up and running listening on port ${RED}$COIN_PORT${NC}."
  echo -e "Configuration file is: ${RED}$CONFIGFOLDER/$CONFIG_FILE${NC}"
  echo -e "Start: ${RED}systemctl start $COIN_NAME.service${NC}"
@@ -240,12 +240,12 @@ function important_information() {
  echo -e "VPS_IP:PORT ${RED}$NODEIP:$COIN_PORT${NC}"
  echo -e "MASTERNODE PRIVATEKEY is: ${RED}$COINKEY${NC}"
  echo -e "Please check ${RED}$COIN_NAME${NC} daemon is running with the following command: ${RED}systemctl status $COIN_NAME.service${NC}"
- echo -e "Use ${RED}$COIN_CLI masternode status${NC} to check your MN."
+ echo -e "Use ${RED}$COIN_CLI getmasternodestatus${NC} to check your MN."
  if [[ -n $SENTINEL_REPO  ]]; then
   echo -e "${RED}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
   echo -e "Sentinel logs is: ${RED}$CONFIGFOLDER/sentinel.log${NC}"
  fi
- echo -e "================================================================================================================================"
+ echo -e "===================================================================================================================="
 }
 
 function setup_node() {
