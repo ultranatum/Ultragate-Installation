@@ -2,29 +2,48 @@
 
 TMP_FOLDER=$(mktemp -d)
 CONFIG_FILE='ultragate.conf'
-CONFIGFOLDER='/root/.ultragate'
+CONFIGFOLDER='/root/.ultragate2'
 COIN_DAEMON='ultragated'
 COIN_CLI='ultragate-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/ultranatum/ultragate/releases/download/v1.2.0.0/ultragate-1.2.0.0-x86_64-linux-gnu.tar.gz'
+COIN_TGZ=`curl -s https://api.github.com/repos/ultranatum/ultragateV2/releases/latest | grep "browser_download_url.*x86_64-linux*" | cut -d : -f 2,3 | tr -d \" | xargs`
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 COIN_NAME='Ultragate'
-COIN_PORT=32852
-RPC_PORT=32853
+COIN_PORT=32552
+RPC_PORT=32553
 
 NODEIP=$(curl -s4 api.ipify.org)
 
-
+BLUE="\033[0;34m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m" 
+PURPLE="\033[0;35m"
 RED='\033[0;31m'
-GREEN='\033[0;32m'
+GREEN="\033[0;32m"
 NC='\033[0m'
+MAG='\e[1;35m'
 
+function purge_old_installation() {
+    echo -e "${GREEN}Searching and removing old $COIN_NAME files and configurations${NC}"
+    #kill wallet daemon
+    systemctl stop $COIN_NAME.service > /dev/null 2>&1
+    sudo killall $COIN_DAEMON > /dev/null 2>&1
+    #remove old ufw port allow
+    sudo ufw delete allow $COIN_PORT/tcp > /dev/null 2>&1
+    #remove old files
+	rm /root/$CONFIGFOLDER/bootstrap.dat.old > /dev/null 2>&1
+	cd /usr/local/bin && sudo rm $COIN_CLI $COIN_DAEMON > /dev/null 2>&1 && cd
+    cd /usr/bin && sudo rm $COIN_CLI $COIN_DAEMON > /dev/null 2>&1 && cd
+        sudo rm -rf ~/$CONFIGFOLDER > /dev/null 2>&1
+    #remove binaries and $COIN_NAME utilities
+    cd /usr/local/bin && sudo rm $COIN_CLI $COIN_DAEMON > /dev/null 2>&1 && cd
+    echo -e "${GREEN}* Done${NONE}";
+}
 
 function download_node() {
   echo -e "Prepare to download ${GREEN}$COIN_NAME${NC}."
   cd $TMP_FOLDER >/dev/null 2>&1
   wget -q $COIN_TGZ
-  compile_error
   tar xvzf $COIN_ZIP --strip 2 >/dev/null 2>&1
   chmod +x $COIN_DAEMON $COIN_CLI
   cp $COIN_DAEMON $COIN_CLI $COIN_PATH
@@ -83,12 +102,12 @@ function create_config() {
   cat << EOF > $CONFIGFOLDER/$CONFIG_FILE
 rpcuser=$RPCUSER
 rpcpassword=$RPCPASSWORD
-#rpcport=$RPC_PORT
+rpcport=$RPC_PORT
+port=$COIN_PORT
 rpcallowip=127.0.0.1
 listen=1
 server=1
-#daemon=1
-port=$COIN_PORT
+daemon=1
 EOF
 }
 
@@ -96,18 +115,18 @@ function create_key() {
   echo -e "Enter your ${RED}$COIN_NAME Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
   read -e COINKEY
   if [[ -z "$COINKEY" ]]; then
-  $COIN_PATH$COIN_DAEMON -daemon
-  sleep 30
+   $COIN_PATH$COIN_DAEMON -daemon
+   sleep 30
   if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
    echo -e "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.{$NC}"
    exit 1
   fi
-  COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
+  COINKEY=$($COIN_PATH$COIN_CLI createmasternodekey)
   if [ "$?" -gt "0" ];
     then
     echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
     sleep 30
-    COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
+    COINKEY=$($COIN_PATH$COIN_CLI createmasternodekey)
   fi
   $COIN_PATH$COIN_CLI stop
 fi
@@ -117,21 +136,15 @@ clear
 function update_config() {
   sed -i 's/daemon=1/daemon=0/' $CONFIGFOLDER/$CONFIG_FILE
   cat << EOF >> $CONFIGFOLDER/$CONFIG_FILE
-logintimestamps=1
 maxconnections=128
-#bind=$NODEIP
+bind=$NODEIP:$COIN_PORT
 masternode=1
 staking=0
-externalip=$NODEIP:$COIN_PORT
+externalip=$NODEIP
 mastermodeaddr=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
 
-addnode=185.206.145.11
-addnode=185.205.209.14
-addnode=185.141.61.244
-addnode=94.156.144.195
-addnode=62.171.163.115
-addnode=161.97.88.111
+
 
 EOF
 }
@@ -181,10 +194,6 @@ fi
 
 
 function checks() {
-if [[ $(lsb_release -d) != *16.04* ]]; then
-  echo -e "${RED}You are not running Ubuntu 16.04. Installation is cancelled.${NC}"
-  exit 1
-fi
 
 if [[ $EUID -ne 0 ]]; then
    echo -e "${RED}$0 must be run as root.${NC}"
@@ -198,29 +207,25 @@ fi
 }
 
 function prepare_system() {
-echo -e "Prepare the system to install ${GREEN}$COIN_NAME${NC} master node."
+echo -e "Preparing the VPS to setup. ${CYAN}$COIN_NAME${NC} ${RED}Masternode${NC}"
 apt-get update >/dev/null 2>&1
 DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null 2>&1
 DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y -qq upgrade >/dev/null 2>&1
 apt install -y software-properties-common >/dev/null 2>&1
-echo -e "${GREEN}Adding bitcoin PPA repository"
-apt-add-repository -y ppa:bitcoin/bitcoin >/dev/null 2>&1
 echo -e "Installing required packages, it may take some time to finish.${NC}"
 apt-get update >/dev/null 2>&1
+apt-get install libzmq3-dev net-tools -y >/dev/null 2>&1
 apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" make software-properties-common \
-build-essential libtool autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev libboost-program-options-dev \
-libboost-system-dev libboost-test-dev libboost-thread-dev sudo automake git wget curl libdb4.8-dev bsdmainutils libdb4.8++-dev \
-libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev  libdb5.3++ unzip libzmq5 >/dev/null 2>&1
+build-essential libtool autoconf libssl-dev \
+sudo automake git wget curl bsdmainutils net-tools \
+libminiupnpc-dev libgmp3-dev ufw pkg-config unzip >/dev/null 2>&1
 if [ "$?" -gt "0" ];
   then
     echo -e "${RED}Not all required packages were installed properly. Try to install them manually by running the following commands:${NC}\n"
     echo "apt-get update"
     echo "apt -y install software-properties-common"
-    echo "apt-add-repository -y ppa:bitcoin/bitcoin"
     echo "apt-get update"
-    echo "apt install -y make build-essential libtool software-properties-common autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev \
-libboost-program-options-dev libboost-system-dev libboost-test-dev libboost-thread-dev sudo automake git curl libdb4.8-dev \
-bsdmainutils libdb4.8++-dev libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev libdb5.3++ unzip libzmq5"
+    echo "apt install -y make software-properties-common build-essential libtool autoconf libssl-dev sudo automake git wget curl bsdmainutils net-tools libminiupnpc-dev libgmp3-dev ufw pkg-config unzip"
  exit 1
 fi
 clear
