@@ -1,5 +1,5 @@
 # Ultragate
-Shell script to install a [Ultragate masternodes](https://www.ultragate.org) on a Linux server running Ubuntu 16.04. Use it on your own risk.
+Shell script to install a [Ultragate masternodes](https://www.ultragate.org) on a Linux server running Ubuntu 18.04. Use it on your own risk.
 ***
 
 ## Installation
@@ -35,7 +35,7 @@ Alias Address Privkey TxHash TxIndex
 * TxIndex:  **Second value from masternode outputs**
 ```
 Example: 
-mn1 127.0.0.1:32852 GQ4aYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0
+mn1 127.0.0.1:32552 GQ4aYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0
 
 ```
 9. Save and close the file.
@@ -49,22 +49,22 @@ startmasternode alias 0 (mymnalias)
 ```
 14. Login to your VPS and check your masternode status by running the following command:
 ```
-ultragate-cli masternodedebug
+ultragate-cli getmasternodestatus
 ```
 ***
 
 ## Usage:
 ```
-ultragate-cli masternodedebug  
+ultragate-cli getmasternodestatus  
 ultragate-cli getinfo
 ```
 Also, if you want to check/start/stop **Ultragate**, run one of the following commands as **root**:
 
 ```
-systemctl status ultragate #To check if ultragate service is running  
-systemctl start ultragate #To start ultragate service  
-systemctl stop ultragate #To stop ultragate service  
-systemctl is-enabled ultragate #To check if ultragate service is enabled on boot  
+systemctl status Ultragate.service #To check if ultragate service is running  
+systemctl start Ultragate.service #To start ultragate service  
+systemctl stop Ultragate.service #To stop ultragate service  
+systemctl is-enabled Ultragate.service #To check if ultragate service is enabled on boot  
 ```  
 ***
 
